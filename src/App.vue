@@ -33,16 +33,25 @@
         <v-main>
             <router-view></router-view>
         </v-main>
+
+        <Error></Error>
     </v-app>
 </template>
 
 <script>
+import Error from './components/Error';
+
 export default {
     name: 'App',
+    components: { Error },
+    props: ['services'],
     data() {
         return {
             drawer: null,
         };
+    },
+    provide() {
+        return this.$props.services;
     }
 };
 </script>
