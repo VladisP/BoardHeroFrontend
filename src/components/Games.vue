@@ -1,23 +1,29 @@
 <template>
-    <v-list v-if="games" class="d-flex justify-space-around align-center flex-wrap">
-        <Game v-for="game of games" :game="game" :key="game.id"></Game>
-    </v-list>
+    <div class="games-container">
+        <Progress v-if="loading"></Progress>
+        <v-list v-if="games" class="d-flex justify-space-around align-center flex-wrap">
+            <Game v-for="game of games" :game="game" :key="game.id"></Game>
+        </v-list>
+    </div>
 </template>
 
 <script>
 import Game from './Game';
+import Progress from './Progress';
 
 export default {
     name: 'Games',
-    components: { Game },
+    components: { Progress, Game },
     inject: ['gameService', 'errorService'],
     data() {
         return {
+            loading: false,
             games: null,
             gamesSubscription: null
         };
     },
     async mounted() {
+        this.loading = true;
         this.gamesSubscription = this.gameService
             .game$
             .subscribe(games => this.games = games);
@@ -26,6 +32,8 @@ export default {
             await this.gameService.getGames();
         } catch (e) {
             this.errorService.setErrorMessage(e.message);
+        } finally {
+            this.loading = false;
         }
     },
     beforeDestroy() {
