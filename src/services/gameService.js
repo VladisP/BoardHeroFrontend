@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { Subject } from 'rxjs';
-import { apiErrorHandler } from '../helper/apiError';
+import { apiErrorHandler } from '../helpers/apiError';
+import { Game } from '../model/game';
 
 export class GameService {
     constructor() {
@@ -21,7 +22,7 @@ export class GameService {
         }
 
         const { data: { payload } } = await this.$axios.get('/games').catch(apiErrorHandler);
-        this.$games = payload;
-        this.$gameSource.next(payload);
+        this.$games = payload && payload.map(rawGame => new Game(rawGame));
+        this.$gameSource.next(this.$games);
     }
 }

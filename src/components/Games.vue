@@ -1,12 +1,15 @@
 <template>
-    <div>
-        Hello Board Hero!
-    </div>
+    <v-list v-if="games" class="d-flex justify-space-around align-center flex-wrap">
+        <Game v-for="game of games" :game="game" :key="game.id"></Game>
+    </v-list>
 </template>
 
 <script>
+import Game from './Game';
+
 export default {
     name: 'Games',
+    components: { Game },
     inject: ['gameService', 'errorService'],
     data() {
         return {
@@ -17,10 +20,7 @@ export default {
     async mounted() {
         this.gamesSubscription = this.gameService
             .game$
-            .subscribe(games => {
-                console.log(games);
-                this.games = games;
-            });
+            .subscribe(games => this.games = games);
 
         try {
             await this.gameService.getGames();
@@ -35,7 +35,3 @@ export default {
     }
 };
 </script>
-
-<style scoped>
-
-</style>
