@@ -22,7 +22,9 @@ export class GameService {
         }
 
         const { data: { payload } } = await this.$axios.get('/games').catch(apiErrorHandler);
-        this.$games = payload && payload.map(rawGame => new Game(rawGame));
+        this.$games = payload && payload
+            .map(rawGame => new Game(rawGame))
+            .sort((game1, game2) => game2.rating - game1.rating);
         this.$gameSource.next(this.$games);
     }
 }
