@@ -27,4 +27,10 @@ export class GameService {
             .sort((game1, game2) => game2.rating - game1.rating);
         this.$gameSource.next(this.$games);
     }
+
+    searchGames(pattern) {
+        const regex = new RegExp(pattern, 'i');
+        const games = (this.$games || []).filter(game => regex.test(game.name));
+        this.$gameSource.next(games);
+    }
 }

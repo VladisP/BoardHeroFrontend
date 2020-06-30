@@ -25,7 +25,8 @@
             <v-app-bar-nav-icon @click.stop="drawer = !drawer"></v-app-bar-nav-icon>
             <v-toolbar-title>Board Hero</v-toolbar-title>
             <v-spacer></v-spacer>
-            <div class="logo-wrapper">
+            <Search></Search>
+            <div class="logo-wrapper ml-4">
                 <v-img src="./assets/logo.png"></v-img>
             </div>
         </v-app-bar>
@@ -40,10 +41,11 @@
 
 <script>
 import Error from './components/Error';
+import Search from './components/Search';
 
 export default {
     name: 'App',
-    components: { Error },
+    components: { Search, Error },
     props: ['services'],
     data() {
         return {
