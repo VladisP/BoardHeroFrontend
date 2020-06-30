@@ -17,15 +17,22 @@ export class GameService {
     }
 
     async getGames() {
-        if (this.$games) {
-            return;
+        if (!this.$games) {
+            const { data: { payload } } = await this.$axios.get('/games').catch(apiErrorHandler);
+            this.$games = payload && payload
+                .map(rawGame => new Game(rawGame))
+                .sort((game1, game2) => game2.rating - game1.rating);
         }
 
-        const { data: { payload } } = await this.$axios.get('/games').catch(apiErrorHandler);
-        this.$games = payload && payload
-            .map(rawGame => new Game(rawGame))
-            .sort((game1, game2) => game2.rating - game1.rating);
         this.$gameSource.next(this.$games);
+    }
+
+    async getGameById(id) {
+        if (!this.$games) {
+            await this.getGames();
+        }
+
+        return (this.$games || []).find(game => game.id === id);
     }
 
     searchGames(pattern) {

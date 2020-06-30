@@ -29,7 +29,7 @@
                     </v-list-item-content>
                 </v-list-item>
 
-                <div class="game-image-wrapper">
+                <router-link class="game-image-wrapper" :to="{name: 'game', params: {id: game.id } }">
                     <v-img
                             :src="game.imageUrl"
                             width="300"
@@ -38,7 +38,7 @@
                             max-height="300"
                             contain>
                     </v-img>
-                </div>
+                </router-link>
 
                 <v-card-actions class="d-flex justify-space-between align-center" dense>
                     <v-list-item class="d-flex flex-column" dense>
