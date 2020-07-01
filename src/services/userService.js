@@ -28,4 +28,9 @@ export class UserService {
 
         this.$user = new User(payload);
     }
+
+    async signOut() {
+        await this.$axios.post('/user/sign-out').catch(apiErrorHandler);
+        this.$user = null;
+    }
 }

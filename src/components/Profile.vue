@@ -9,6 +9,7 @@
                     class="rounded-circle mb-4"
             ></v-img>
             <h1 class="accent--text mb-4">{{user.name}}</h1>
+            <v-btn @click="signOut" color="error" outlined>Sign Out</v-btn>
             <div class="d-flex justify-space-around profile-info-wrapper">
                 <div class="d-flex flex-column align-center">
                     <p class="accent--text">Karma</p>
@@ -49,6 +50,16 @@ export default {
                 'grey--text': this.user.karma === 0,
                 'error--text': this.user.karma < 0
             };
+        }
+    },
+    methods: {
+        async signOut() {
+            try {
+                await this.userService.signOut();
+                await this.$router.replace({ name: 'login' });
+            } catch (e) {
+                this.errorService.setErrorMessage(e.message);
+            }
         }
     },
     async mounted() {
