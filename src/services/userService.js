@@ -1,6 +1,7 @@
 import axios from 'axios';
 import { apiErrorHandler } from '../helpers/apiError';
 import { User } from '../model/user';
+import { FavoriteGameRecord } from '../model/favoriteGameRecord';
 
 export class UserService {
     constructor() {
@@ -32,5 +33,19 @@ export class UserService {
     async signOut() {
         await this.$axios.post('/user/sign-out').catch(apiErrorHandler);
         this.$user = null;
+    }
+
+    async addToFavorite(gameId) {
+        const { data: { payload } } = await this.$axios.post(`/user/favorite-game/${gameId}`).catch(apiErrorHandler);
+        this.$user.favoriteGames.push(new FavoriteGameRecord(payload));
+    }
+
+    async deleteFromFavorite(gameId) {
+        await this.$axios.delete(`/user/favorite-game/${gameId}`).catch(apiErrorHandler);
+        this.$user.favoriteGames = this.$user.favoriteGames.filter(record => record.id !== gameId);
+    }
+
+    isFavoriteGame(gameId) {
+        return this.$user && this.$user.favoriteGames.findIndex(record => record.id === gameId) !== -1;
     }
 }

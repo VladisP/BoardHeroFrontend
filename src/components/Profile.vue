@@ -1,7 +1,7 @@
 <template>
     <div class="profile-container">
         <Progress v-if="loading"></Progress>
-        <div v-if="user" class="d-flex flex-column align-center secondary pt-8">
+        <div v-if="user && favoriteGames" class="d-flex flex-column align-center secondary pt-8">
             <v-img
                     :src="`https://avatars.dicebear.com/v2/identicon/${user.id}.svg`"
                     width="150"
@@ -10,7 +10,7 @@
             ></v-img>
             <h1 class="accent--text mb-4">{{user.name}}</h1>
             <v-btn @click="signOut" color="error" outlined>Sign Out</v-btn>
-            <div class="d-flex justify-space-around profile-info-wrapper">
+            <div class="d-flex justify-space-around profile-info-wrapper mb-4">
                 <div class="d-flex flex-column align-center">
                     <p class="accent--text">Karma</p>
                     <h3 :class="karmaClasses">{{user.karma | viewKarma}}</h3>
@@ -20,6 +20,21 @@
                     <h3 class="grey--text">{{user.createdAt}}</h3>
                 </div>
             </div>
+            <v-tabs v-model="tabs" background-color="accent" centered grow>
+                <v-tabs-slider color="primary"></v-tabs-slider>
+                <v-tab>Favorite games</v-tab>
+                <v-tab>Reviews</v-tab>
+                <v-tabs-items v-model="tabs">
+                    <v-tab-item>
+                        <div v-for="game of favoriteGames" :key="game.id">
+                            {{game.name}}
+                        </div>
+                    </v-tab-item>
+                    <v-tab-item>
+                        lol
+                    </v-tab-item>
+                </v-tabs-items>
+            </v-tabs>
         </div>
     </div>
 </template>
@@ -35,7 +50,9 @@ export default {
     data() {
         return {
             loading: false,
-            user: null
+            user: null,
+            tabs: null,
+            favoriteGames: null
         };
     },
     filters: {
@@ -60,6 +77,15 @@ export default {
             } catch (e) {
                 this.errorService.setErrorMessage(e.message);
             }
+        },
+        async getFavoriteGames() {
+            const games = [];
+
+            for (const id of this.user.favoriteGames.map(game => game.id)) {
+                games.push(await this.gameService.getGameById(id));
+            }
+
+            return games;
         }
     },
     async mounted() {
@@ -68,6 +94,7 @@ export default {
         try {
             await this.gameService.getGames();
             this.user = await this.userService.getUser();
+            this.favoriteGames = await this.getFavoriteGames();
         } catch (e) {
             this.errorService.setErrorMessage(e.message);
 

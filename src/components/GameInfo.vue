@@ -22,8 +22,8 @@
                             {{game.rating | beautyRating}}
                         </v-list-item>
                         <v-list-item class="d-flex justify-end">
-                            <v-btn icon>
-                                <v-icon>mdi-heart</v-icon>
+                            <v-btn @click="favoriteAction" icon color="error" :disabled="disableLike">
+                                <v-icon :class="favoriteIconClasses">mdi-heart</v-icon>
                             </v-btn>
                             {{game.likesCount}}
                         </v-list-item>
@@ -87,6 +87,7 @@ export default {
     data() {
         return {
             loading: false,
+            disableLike: false,
             game: null,
             reviews: null,
             user: null
@@ -95,6 +96,49 @@ export default {
     filters: {
         beautyRating(value) {
             return value && value.toFixed(1);
+        }
+    },
+    computed: {
+        favoriteIconClasses() {
+            const isFavoriteGame = this.userService.isFavoriteGame(this.game.id);
+
+            return {
+                'error--text': isFavoriteGame,
+                'grey--text': !isFavoriteGame
+            };
+        }
+    },
+    methods: {
+        async favoriteAction() {
+            if (!this.userService.isFavoriteGame(this.game.id)) {
+                await this.addToFavorite();
+            } else {
+                await this.deleteFromFavorite();
+            }
+        },
+        async addToFavorite() {
+            this.disableLike = true;
+
+            try {
+                await this.userService.addToFavorite(this.game.id);
+                this.game.likesCount++;
+            } catch (e) {
+                this.errorService.setErrorMessage(e.message);
+            } finally {
+                this.disableLike = false;
+            }
+        },
+        async deleteFromFavorite() {
+            this.disableLike = true;
+
+            try {
+                await this.userService.deleteFromFavorite(this.game.id);
+                this.game.likesCount--;
+            } catch (e) {
+                this.errorService.setErrorMessage(e.message);
+            } finally {
+                this.disableLike = false;
+            }
         }
     },
     async mounted() {
