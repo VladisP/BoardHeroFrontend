@@ -69,7 +69,7 @@ export class UserService {
     }
 
     getRatingByReviewId(reviewId) {
-        return this.$user.ratings.find(rating => rating.reviewId === reviewId);
+        return this.$user && this.$user.ratings.find(rating => rating.reviewId === reviewId);
     }
 
     async updateReviewRating(reviewId, isPositive) {
