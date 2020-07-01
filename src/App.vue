@@ -10,7 +10,7 @@
                         <v-list-item-title>Account</v-list-item-title>
                     </v-list-item-content>
                 </v-list-item>
-                <v-list-item link>
+                <v-list-item link :to="{name: 'games'}" exact>
                     <v-list-item-action>
                         <v-icon color="accent">mdi-view-dashboard</v-icon>
                     </v-list-item-action>
