@@ -82,13 +82,14 @@ import Review from './Review';
 export default {
     name: 'GameInfo',
     components: { Review, Progress },
-    inject: ['gameService', 'errorService'],
+    inject: ['gameService', 'errorService', 'userService'],
     props: ['id'],
     data() {
         return {
             loading: false,
             game: null,
-            reviews: null
+            reviews: null,
+            user: null
         };
     },
     filters: {
@@ -100,6 +101,7 @@ export default {
         this.loading = true;
 
         try {
+            this.user = await this.userService.getUser().catch(console.error);
             this.game = await this.gameService.getGameById(this.id);
             this.reviews = await this.gameService.getReviewsById(this.game.reviews.map(review => review.id));
         } catch (e) {

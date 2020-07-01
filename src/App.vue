@@ -2,7 +2,7 @@
     <v-app id="inspire">
         <v-navigation-drawer v-model="drawer" color="secondary" app>
             <v-list dense>
-                <v-list-item link>
+                <v-list-item link :to="{name: 'profile'}" exact>
                     <v-list-item-action>
                         <v-icon color="accent">mdi-account</v-icon>
                     </v-list-item-action>
