@@ -14,12 +14,13 @@ import Progress from './Progress';
 export default {
     name: 'Games',
     components: { Progress, Game },
-    inject: ['gameService', 'errorService'],
+    inject: ['gameService', 'errorService', 'userService'],
     data() {
         return {
             loading: false,
             games: null,
-            gamesSubscription: null
+            gamesSubscription: null,
+            user: null
         };
     },
     async mounted() {
@@ -29,6 +30,7 @@ export default {
             .subscribe(games => this.games = games);
 
         try {
+            this.user = await this.userService.getUser().catch(console.error);
             await this.gameService.getGames();
         } catch (e) {
             this.errorService.setErrorMessage(e.message);

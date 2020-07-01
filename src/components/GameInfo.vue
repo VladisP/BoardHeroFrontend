@@ -16,14 +16,14 @@
                     <h1>{{game.name}}<span v-if="game.yearPublished"> ({{game.yearPublished}})</span></h1>
                     <v-list class="d-flex justify-space-between align-center">
                         <v-list-item>
-                            <v-btn icon>
-                                <v-icon>mdi-star</v-icon>
+                            <v-btn @click="ratingAction" icon color="yellow">
+                                <v-icon :class="ratingIconClasses">mdi-star</v-icon>
                             </v-btn>
-                            {{game.rating | beautyRating}}
+                            <span :class="ratingClasses">{{game.rating | beautyRating}}</span>
                         </v-list-item>
                         <v-list-item class="d-flex justify-end">
-                            <v-btn icon>
-                                <v-icon>mdi-heart</v-icon>
+                            <v-btn @click="favoriteAction" icon color="error" :disabled="disableLike">
+                                <v-icon :class="favoriteIconClasses">mdi-heart</v-icon>
                             </v-btn>
                             {{game.likesCount}}
                         </v-list-item>
@@ -82,13 +82,15 @@ import Review from './Review';
 export default {
     name: 'GameInfo',
     components: { Review, Progress },
-    inject: ['gameService', 'errorService'],
+    inject: ['gameService', 'errorService', 'userService'],
     props: ['id'],
     data() {
         return {
             loading: false,
+            disableLike: false,
             game: null,
-            reviews: null
+            reviews: null,
+            user: null
         };
     },
     filters: {
@@ -96,10 +98,74 @@ export default {
             return value && value.toFixed(1);
         }
     },
+    computed: {
+        ratingIconClasses() {
+            const hasReview = this.userService.hasReview(this.game.reviews);
+
+            return {
+                'yellow--text': hasReview,
+                'grey--text': !hasReview
+            };
+        },
+        ratingClasses() {
+            return {
+                'accent--text': this.game.rating >= 7,
+                'grey--text': (this.game.rating < 7 && this.game.rating >= 5) || (this.game.rating === 0),
+                'error--text': this.game.rating < 5 && this.game.rating !== 0
+            };
+        },
+        favoriteIconClasses() {
+            const isFavoriteGame = this.userService.isFavoriteGame(this.game.id);
+
+            return {
+                'error--text': isFavoriteGame,
+                'grey--text': !isFavoriteGame
+            };
+        }
+    },
+    methods: {
+        async ratingAction() {
+            if (!this.userService.hasReview(this.game.reviews)) {
+                await this.$router.push({ name: 'review-form', params: { gameId: this.game.id } });
+            }
+        },
+        async favoriteAction() {
+            if (!this.userService.isFavoriteGame(this.game.id)) {
+                await this.addToFavorite();
+            } else {
+                await this.deleteFromFavorite();
+            }
+        },
+        async addToFavorite() {
+            this.disableLike = true;
+
+            try {
+                await this.userService.addToFavorite(this.game.id);
+                this.game.likesCount++;
+            } catch (e) {
+                this.errorService.setErrorMessage(e.message);
+            } finally {
+                this.disableLike = false;
+            }
+        },
+        async deleteFromFavorite() {
+            this.disableLike = true;
+
+            try {
+                await this.userService.deleteFromFavorite(this.game.id);
+                this.game.likesCount--;
+            } catch (e) {
+                this.errorService.setErrorMessage(e.message);
+            } finally {
+                this.disableLike = false;
+            }
+        }
+    },
     async mounted() {
         this.loading = true;
 
         try {
+            this.user = await this.userService.getUser().catch(console.error);
             this.game = await this.gameService.getGameById(this.id);
             this.reviews = await this.gameService.getReviewsById(this.game.reviews.map(review => review.id));
         } catch (e) {

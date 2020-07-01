@@ -47,6 +47,16 @@ export class GameService {
         return reviews;
     }
 
+    async sendReview(gameId, rating, title, description) {
+        const { data: { payload } } = await this.$axios.post(`/review/${gameId}`, { rating, title, description });
+        const game = await this.getGameById(gameId);
+
+        game.rating = payload.new_game_rating;
+        game.reviews.push({ id: payload.review_id });
+
+        return payload.review_id;
+    }
+
     searchGames(pattern) {
         const regex = new RegExp(pattern, 'i');
         const games = (this.$games || []).filter(game => regex.test(game.name));
