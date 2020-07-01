@@ -2,6 +2,7 @@ import axios from 'axios';
 import { apiErrorHandler } from '../helpers/apiError';
 import { User } from '../model/user';
 import { FavoriteGameRecord } from '../model/favoriteGameRecord';
+import { Rating } from '../model/rating';
 
 export class UserService {
     constructor() {
@@ -65,5 +66,23 @@ export class UserService {
 
     addReview(reviewId) {
         this.$user.reviews.push(reviewId);
+    }
+
+    getRatingByReviewId(reviewId) {
+        return this.$user.ratings.find(rating => rating.reviewId === reviewId);
+    }
+
+    async updateReviewRating(reviewId, isPositive) {
+        const { data: { payload } } = await this.$axios
+            .post(`/review/rating/${reviewId}`, { isPositive })
+            .catch(apiErrorHandler);
+
+        if (payload.is_positive === null) {
+            this.$user.ratings = this.$user.ratings.filter(rating => rating.reviewId !== reviewId);
+        } else {
+            this.$user.ratings.push(new Rating({ review_id: reviewId, is_positive: payload.is_positive }));
+        }
+
+        return payload.new_score;
     }
 }

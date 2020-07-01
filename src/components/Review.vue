@@ -8,15 +8,19 @@
                     :class="`elevation-${hover ? 24 : 6}`"
             >
                 <v-list class="d-flex justify-space-between align-center">
-                    <v-list-item><h1 :class="ratingClasses">{{review.rating}}</h1></v-list-item>
-                    <v-list-item><div class="grey--text">{{review.createdAt}}</div></v-list-item>
+                    <v-list-item>
+                        <h1 :class="ratingClasses">{{review.rating}}</h1>
+                    </v-list-item>
+                    <v-list-item>
+                        <div class="grey--text">{{review.createdAt}}</div>
+                    </v-list-item>
                     <v-list-item class="d-flex justify-end">
-                        <v-btn icon color="accent">
-                            <v-icon>mdi-arrow-up</v-icon>
+                        <v-btn @click="updateReviewRating(true)" icon color="accent" :disabled="disableArrows">
+                            <v-icon :class="arrowUpClasses">mdi-arrow-up</v-icon>
                         </v-btn>
                         <div :class="scoreClasses">{{review.score | viewScore}}</div>
-                        <v-btn icon color="error">
-                            <v-icon>mdi-arrow-down</v-icon>
+                        <v-btn @click="updateReviewRating(false)" icon color="error" :disabled="disableArrows">
+                            <v-icon :class="arrowDownClasses">mdi-arrow-down</v-icon>
                         </v-btn>
                     </v-list-item>
                 </v-list>
@@ -39,8 +43,14 @@ import { Review } from '../model/review';
 
 export default {
     name: 'Review',
+    inject: ['userService', 'errorService'],
     props: {
         review: Review
+    },
+    data() {
+        return {
+            disableArrows: false
+        };
     },
     filters: {
         viewScore(value) {
@@ -60,6 +70,35 @@ export default {
                 'accent--text': this.review.score > 0,
                 'error--text': this.review.score < 0
             };
+        },
+        arrowUpClasses() {
+            const rating = this.userService.getRatingByReviewId(this.review.id);
+
+            return {
+                'accent--text': rating && rating.isPositive,
+                'grey--text': !rating || !rating.isPositive
+            };
+        },
+        arrowDownClasses() {
+            const rating = this.userService.getRatingByReviewId(this.review.id);
+
+            return {
+                'error--text': rating && !rating.isPositive,
+                'grey--text': !rating || rating.isPositive
+            };
+        }
+    },
+    methods: {
+        async updateReviewRating(isPositive) {
+            this.disableArrows = true;
+
+            try {
+                this.review.score = await this.userService.updateReviewRating(this.review.id, isPositive);
+            } catch (e) {
+                this.errorService.setErrorMessage(e.message);
+            } finally {
+                this.disableArrows = false;
+            }
         }
     }
 };
