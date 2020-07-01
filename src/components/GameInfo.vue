@@ -67,22 +67,28 @@
                 </div>
             </div>
             <p>{{game.description}}</p>
+            <div v-if="reviews && reviews.length > 0" class="d-flex flex-column align-center">
+                <div class="reviews-header-wrapper"><h2>Reviews</h2></div>
+                <Review v-for="review of reviews" :key="review.id" :review="review"></Review>
+            </div>
         </div>
     </div>
 </template>
 
 <script>
 import Progress from './Progress';
+import Review from './Review';
 
 export default {
     name: 'GameInfo',
-    components: { Progress },
+    components: { Review, Progress },
     inject: ['gameService', 'errorService'],
     props: ['id'],
     data() {
         return {
             loading: false,
-            game: null
+            game: null,
+            reviews: null
         };
     },
     filters: {
@@ -95,6 +101,7 @@ export default {
 
         try {
             this.game = await this.gameService.getGameById(this.id);
+            this.reviews = await this.gameService.getReviewsById(this.game.reviews.map(review => review.id));
         } catch (e) {
             this.errorService.setErrorMessage(e.message);
         } finally {
@@ -103,3 +110,9 @@ export default {
     }
 };
 </script>
+
+<style scoped>
+    .reviews-header-wrapper {
+        width: 100%;
+    }
+</style>

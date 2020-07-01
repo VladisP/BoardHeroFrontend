@@ -2,6 +2,7 @@ import axios from 'axios';
 import { Subject } from 'rxjs';
 import { apiErrorHandler } from '../helpers/apiError';
 import { Game } from '../model/game';
+import { Review } from '../model/review';
 
 export class GameService {
     constructor() {
@@ -33,6 +34,17 @@ export class GameService {
         }
 
         return (this.$games || []).find(game => game.id === id);
+    }
+
+    async getReviewsById(ids) {
+        const reviews = [];
+
+        for (const id of ids) {
+            const { data: { payload } } = await this.$axios.get(`/review/${id}`).catch(apiErrorHandler);
+            reviews.push(new Review(payload));
+        }
+
+        return reviews;
     }
 
     searchGames(pattern) {

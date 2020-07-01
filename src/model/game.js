@@ -16,7 +16,8 @@ export class Game {
         rating,
         mechanics,
         categories,
-        likes_count
+        likes_count,
+        reviews
     }) {
         this.id = id;
         this.name = name;
@@ -33,6 +34,6 @@ export class Game {
         this.mechanics = mechanics && mechanics.map(mechanic => new Tag(mechanic));
         this.categories = categories && categories.map(category => new Tag(category));
         this.likesCount = likes_count && Number.parseInt(likes_count);
-        // "reviews": []
+        this.reviews = reviews || [];
     }
 }
