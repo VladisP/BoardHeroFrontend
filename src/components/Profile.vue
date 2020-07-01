@@ -26,8 +26,8 @@
                 <v-tab>Reviews</v-tab>
                 <v-tabs-items v-model="tabs">
                     <v-tab-item>
-                        <div v-for="game of favoriteGames" :key="game.id">
-                            {{game.name}}
+                        <div class="d-flex justify-space-around align-center flex-wrap">
+                            <Game v-for="game of favoriteGames" :game="game" :key="game.id"></Game>
                         </div>
                     </v-tab-item>
                     <v-tab-item>
@@ -42,10 +42,11 @@
 <script>
 import Progress from './Progress';
 import { ErrorMessage } from '../helpers/constants';
+import Game from './Game';
 
 export default {
     name: 'Profile',
-    components: { Progress },
+    components: { Game, Progress },
     inject: ['gameService', 'errorService', 'userService'],
     data() {
         return {
