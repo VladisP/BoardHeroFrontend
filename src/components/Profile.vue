@@ -1,7 +1,7 @@
 <template>
     <div class="profile-container">
         <Progress v-if="loading"></Progress>
-        <div v-if="user && favoriteGames" class="d-flex flex-column align-center secondary pt-8">
+        <div v-if="user && favoriteGames && reviews" class="d-flex flex-column align-center secondary pt-8">
             <v-img
                     :src="`https://avatars.dicebear.com/v2/identicon/${user.id}.svg`"
                     width="150"
@@ -31,7 +31,9 @@
                         </div>
                     </v-tab-item>
                     <v-tab-item>
-                        lol
+                        <div class="d-flex flex-column align-center">
+                            <Review v-for="review of reviews" :review="review" :key="review.id"></Review>
+                        </div>
                     </v-tab-item>
                 </v-tabs-items>
             </v-tabs>
@@ -43,17 +45,19 @@
 import Progress from './Progress';
 import { ErrorMessage } from '../helpers/constants';
 import Game from './Game';
+import Review from './Review';
 
 export default {
     name: 'Profile',
-    components: { Game, Progress },
+    components: { Review, Game, Progress },
     inject: ['gameService', 'errorService', 'userService'],
     data() {
         return {
             loading: false,
             user: null,
             tabs: null,
-            favoriteGames: null
+            favoriteGames: null,
+            reviews: null
         };
     },
     filters: {
@@ -96,6 +100,7 @@ export default {
             await this.gameService.getGames();
             this.user = await this.userService.getUser();
             this.favoriteGames = await this.getFavoriteGames();
+            this.reviews = await this.gameService.getReviewsById(this.user.reviews);
         } catch (e) {
             this.errorService.setErrorMessage(e.message);
 

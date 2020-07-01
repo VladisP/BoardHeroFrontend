@@ -48,4 +48,22 @@ export class UserService {
     isFavoriteGame(gameId) {
         return this.$user && this.$user.favoriteGames.findIndex(record => record.id === gameId) !== -1;
     }
+
+    hasReview(gameReviews) {
+        if (!this.$user) {
+            return false;
+        }
+
+        for (const { id } of gameReviews) {
+            if (this.$user.reviews.includes(id)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    addReview(reviewId) {
+        this.$user.reviews.push(reviewId);
+    }
 }

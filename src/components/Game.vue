@@ -14,10 +14,10 @@
                         <v-list-item-title class="headline">{{game.name}}</v-list-item-title>
                         <v-list-item-subtitle class="d-flex justify-space-between align-center">
                             <v-list-item>
-                                <v-btn icon>
-                                    <v-icon>mdi-star</v-icon>
+                                <v-btn @click="ratingAction" icon color="yellow">
+                                    <v-icon :class="ratingIconClasses">mdi-star</v-icon>
                                 </v-btn>
-                                {{game.rating | beautyRating}}
+                                <span :class="ratingClasses">{{game.rating | beautyRating}}</span>
                             </v-list-item>
                             <v-list-item class="d-flex justify-end">
                                 <v-btn @click="favoriteAction" icon color="error" :disabled="disableLike">
@@ -79,6 +79,21 @@ export default {
         }
     },
     computed: {
+        ratingIconClasses() {
+            const hasReview = this.userService.hasReview(this.game.reviews);
+
+            return {
+                'yellow--text': hasReview,
+                'grey--text': !hasReview
+            };
+        },
+        ratingClasses() {
+            return {
+                'accent--text': this.game.rating >= 7,
+                'grey--text': (this.game.rating < 7 && this.game.rating >= 5) || (this.game.rating === 0),
+                'error--text': this.game.rating < 5 && this.game.rating !== 0
+            };
+        },
         favoriteIconClasses() {
             const isFavoriteGame = this.userService.isFavoriteGame(this.game.id);
 
@@ -89,6 +104,11 @@ export default {
         }
     },
     methods: {
+        async ratingAction() {
+            if (!this.userService.hasReview(this.game.reviews)) {
+                await this.$router.push({ name: 'review-form', params: { gameId: this.game.id } });
+            }
+        },
         async favoriteAction() {
             if (!this.userService.isFavoriteGame(this.game.id)) {
                 await this.addToFavorite();
